@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwwnuu6lf3fla"]
+
+[ext_resource type="Script" path="res://MainMenu.gd" id="1_bfkau"]
+[ext_resource type="Texture2D" uid="uid://b5ci0iwjl8vpe" path="res://Textures/MainMenu.png" id="2_6ou8k"]
+
+[node name="MainMenu" type="Node2D"]
+script = ExtResource("1_bfkau")
+
+[node name="Background" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_6ou8k")
+
+[node name="New" type="Button" parent="Background"]
+layout_mode = 0
+offset_left = 206.0
+offset_top = 335.0
+offset_right = 434.0
+offset_bottom = 437.0
+text = "New Game"
+
+[node name="Load" type="Button" parent="Background"]
+layout_mode = 0
+offset_left = 206.0
+offset_top = 449.0
+offset_right = 434.0
+offset_bottom = 551.0
+text = "Load Game
+"
+
+[node name="Quit" type="Button" parent="Background"]
+layout_mode = 0
+offset_left = 206.0
+offset_top = 564.0
+offset_right = 434.0
+offset_bottom = 666.0
+text = "Quit
+"
+
+[connection signal="pressed" from="Background/New" to="." method="onNewPressed"]
+[connection signal="pressed" from="Background/Load" to="." method="onLoadPressed"]
+[connection signal="pressed" from="Background/Quit" to="." method="onQuitPressed"]

@@ -1,0 +1,56 @@
+{
+	"Level1": [
+		{
+			"texture": "res://Textures/TestPuzzle.png",
+			"dialogue": ["Initial dialogue 1", "Initial dialogue 2"],
+			"dialoguePosition": [200, 200]
+		},
+		{
+			"size": 3,
+			"dialogue": ["Level1 puzzle 1 dialogue"],
+			"dialoguePosition": [200, 200]
+		},
+		{
+			"size": 4,
+			"dialogue": ["Level1 puzzle 2 dialogue"]
+		},
+		{
+			"dialogue": ["Ending dialogue"]
+		}
+	],
+	"Level2": [
+		{
+			"texture": "res://Textures/TestPuzzle.png"
+		}
+	],
+	"Level3": [
+		{
+			"texture": "res://Textures/TestPuzzle.png"
+		}
+	],
+	"Level4": [
+		{
+			"texture": "res://Textures/TestPuzzle.png"
+		}
+	],
+	"Level5": [
+		{
+			"texture": "res://Textures/TestPuzzle.png"
+		}
+	],
+	"Level6": [
+		{
+			"texture": "res://Textures/TestPuzzle.png"
+		}
+	],
+	"Level7": [
+		{
+			"texture": "res://Textures/TestPuzzle.png"
+		}
+	],
+	"Level8": [
+		{
+			"texture": "res://Textures/TestPuzzle.png"
+		}
+	]
+}

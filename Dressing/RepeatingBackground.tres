@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://chb8ocmi1cs3q"]
+
+[ext_resource type="Shader" path="res://Dressing/RepeatingBackground.gdshader" id="1_01xdc"]
+
+[resource]
+shader = ExtResource("1_01xdc")

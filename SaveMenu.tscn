@@ -1,0 +1,117 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6l33i5psutum"]
+
+[ext_resource type="Script" path="res://SaveMenu.gd" id="1_670as"]
+[ext_resource type="Material" uid="uid://chb8ocmi1cs3q" path="res://Dressing/RepeatingBackground.tres" id="2_h2nyd"]
+[ext_resource type="Theme" uid="uid://xv7rhh2aw26" path="res://Dressing/Theme.tres" id="3_0hyw4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u55je"]
+bg_color = Color(0.737255, 0, 0.533333, 1)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="SaveMenu" type="Node2D"]
+script = ExtResource("1_670as")
+
+[node name="Background" type="ColorRect" parent="."]
+material = ExtResource("2_h2nyd")
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -360.0
+offset_right = 200.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 82
+alignment = 1
+
+[node name="Button" type="Button" parent="Background/VBoxContainer"]
+custom_minimum_size = Vector2(400, 57)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_0hyw4")
+text = "Empty Slot"
+text_overrun_behavior = 1
+clip_text = true
+
+[node name="Button2" type="Button" parent="Background/VBoxContainer"]
+custom_minimum_size = Vector2(400, 57)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_0hyw4")
+text = "Empty Slot"
+text_overrun_behavior = 1
+clip_text = true
+
+[node name="Button3" type="Button" parent="Background/VBoxContainer"]
+custom_minimum_size = Vector2(400, 57)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_0hyw4")
+text = "Empty Slot"
+text_overrun_behavior = 1
+clip_text = true
+
+[node name="Panel" type="Panel" parent="Background"]
+visible = false
+custom_minimum_size = Vector2(400, 128)
+layout_mode = 0
+offset_left = 370.0
+offset_top = 260.0
+offset_right = 910.0
+offset_bottom = 404.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_u55je")
+
+[node name="Label" type="Label" parent="Background/Panel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -243.5
+offset_right = 243.5
+offset_bottom = 64.0
+grow_horizontal = 2
+theme = ExtResource("3_0hyw4")
+theme_override_font_sizes/font_size = 22
+text = "Are you sure you want to overwrite this save?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Button" type="Button" parent="Background/Panel"]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 64.0
+offset_right = 187.0
+offset_bottom = 115.0
+theme = ExtResource("3_0hyw4")
+theme_override_font_sizes/font_size = 28
+text = "Yes"
+
+[node name="Button2" type="Button" parent="Background/Panel"]
+layout_mode = 0
+offset_left = 321.0
+offset_top = 64.0
+offset_right = 437.0
+offset_bottom = 115.0
+theme = ExtResource("3_0hyw4")
+theme_override_font_sizes/font_size = 28
+text = " Cancel "
+
+[connection signal="pressed" from="Background/Panel/Button" to="." method="onConfirm" binds= [false]]
+[connection signal="pressed" from="Background/Panel/Button2" to="." method="onConfirm" binds= [true]]
