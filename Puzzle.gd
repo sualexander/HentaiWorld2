@@ -25,13 +25,16 @@ var dialogue: Label
 
 signal swapQueueFinished
 enum State {Dialogue, Shuffling, Playing}
-var state: State = State.Dialogue
+var state: State = State.Shuffling
 var puzzleIndex: int = 0
+var levelName: String
 
-func startLevel(levelName: String):
+func startLevel(name: String):
+	levelName = name
 	data = SaveSystem.levelData[levelName]
 	for puzzle in data:
-		if puzzle.has("size"): widths.append(puzzle["size"])
+		if puzzle.has("size"): 
+			widths.append(puzzle["size"])
 		else: widths.append(0)
 		dialogues.append(puzzle["dialogue"])
 		if puzzle.has("texture"): textures.append(load(puzzle["texture"]))
@@ -42,12 +45,24 @@ func startLevel(levelName: String):
 		else: dialoguePositions.append(Vector2.ZERO)
 	assert(widths.size() == textures.size() && widths.size() == dialogues.size() && widths.size() == dialoguePositions.size())
 	
+	var counter: int = 0
+	var lastPuzzleIndex: int
+	var numSolved: int = SaveSystem.saveData["Slots"][SaveSystem.currentSlot][levelName]
+	if numSolved != 0:
+		for i in range(widths.size()):
+			if widths[i] != 0:
+				lastPuzzleIndex = i
+				if counter != numSolved: 
+					counter += 1
+			puzzleIndex = counter + 1
+		if puzzleIndex > lastPuzzleIndex: puzzleIndex = lastPuzzleIndex
+	
 	background = TextureRect.new()
 	add_child(background)
 	background.texture = textures[0]
 	background.modulate = Color.BLACK
 	var tween = get_tree().create_tween()
-	tween.tween_property(background, "modulate", Color.WHITE, 1)
+	tween.tween_property(background, "modulate", Color.WHITE, Globals.SCENE_FADE_TIME)
 	
 	await tween.finished
 	connect("swapQueueFinished", onSwapQueueFinished)
@@ -67,7 +82,7 @@ func initializeDialogue():
 	bubble.antialiased = true
 	
 	bubbleOutline.modulate = Color(1, 1, 1, 0)
-	add_child(bubbleOutline)
+	background.add_child(bubbleOutline)
 	bubbleOutline.add_child(bubble) 
 	bubble.add_child(dialogue)
 	
@@ -83,6 +98,12 @@ func advanceDialogue():
 	if dialogueIndex == 0: 
 		currentDialogue = dialogues[puzzleIndex]
 		if dialoguePositions[puzzleIndex] != Vector2.ZERO: dialoguePosition = dialoguePositions[puzzleIndex]
+		if dialoguePosition == Vector2.ZERO:
+			for i in range(puzzleIndex - 1, -1, -1):
+				if dialoguePositions[i] != Vector2.ZERO:
+					dialoguePosition = dialoguePositions[i]
+					break
+		assert(dialoguePosition != Vector2.ZERO)
 	if dialogueIndex == currentDialogue.size(): 
 		dialogueIndex = 0
 		textTween = get_tree().create_tween()
@@ -107,6 +128,7 @@ func onSwapQueueFinished():
 			print(puzzleIndex)
 			if puzzleIndex + 1 == data.size(): endLevel()
 			else:
+				SaveSystem.updateSave("", levelName, puzzleIndex)
 				destroyPuzzle()
 				puzzleIndex += 1
 				advanceDialogue()
@@ -114,16 +136,22 @@ func onSwapQueueFinished():
 func endLevel():
 	state = State.Shuffling
 	destroyPuzzle()
-	print("the end")
+	#ending animation
+	exitLevel()
 
 var backgroundTexture
 var gridOffset: Vector2
 var tileSize: float
 func createPuzzle():
 	state = State.Shuffling
-	if textures[puzzleIndex]: 
-		backgroundTexture = textures[puzzleIndex]
+	if textures[puzzleIndex]: backgroundTexture = textures[puzzleIndex]
+	if !backgroundTexture:
+		for i in range(puzzleIndex - 1, -1, -1):
+			if textures[i]:
+				backgroundTexture = textures[i]
+				break
 		background.texture = backgroundTexture
+	assert(dialoguePosition != Vector2.ZERO)
 	
 	tileSize = float(gridSize) / widths[puzzleIndex]
 	var resolution = get_tree().root.content_scale_size
@@ -152,13 +180,27 @@ func destroyPuzzle():
 			child.queue_free()
 
 func _input(_event):
-	if state == State.Dialogue:
-		if Input.is_action_just_pressed("enter"): advanceDialogue()
-	elif state == State.Playing:
-		if Input.is_action_just_pressed("left"): swap("right")
-		if Input.is_action_just_pressed("right"): swap("left")
-		if Input.is_action_just_pressed("up"): swap("down")
-		if Input.is_action_just_pressed("down"): swap("up")
+	if Input.is_action_just_pressed("escape"):
+		exitLevel()
+	else:
+		if state == State.Dialogue:
+			if Input.is_action_just_pressed("enter") || Input.is_action_just_pressed("right") ||\
+			Input.is_action_just_pressed("up"): 
+				advanceDialogue()
+		elif state == State.Playing:
+			if Input.is_action_just_pressed("left"): swap("right")
+			if Input.is_action_just_pressed("right"): swap("left")
+			if Input.is_action_just_pressed("up"): swap("down")
+			if Input.is_action_just_pressed("down"): swap("up")
+
+func exitLevel():
+	var newScene = load("res://LevelSelect.tscn").instantiate()
+	var tween = get_tree().create_tween()
+	tween.tween_property(background, "modulate", Color.BLACK, Globals.SCENE_FADE_TIME)
+	await tween.finished
+	var oldScene = get_tree().root.get_node("Puzzle")
+	oldScene.call_deferred("free")
+	get_tree().root.add_child(newScene)
 
 #--------------------------------------------------------------------------------------------------
 var textTween: Tween
@@ -226,8 +268,7 @@ func createGrid():
 			tile.position = gridOffset + Vector2(col * tileSize, row * tileSize)
 			tile.region_enabled = true
 			tile.region_rect = Rect2(tile.position.x - (tileSize / 2), tile.position.y - (tileSize / 2), 
-			tileSize, tileSize)		
-	drawLines()
+			tileSize, tileSize)
 
 func drawLines():
 	var width := widths[puzzleIndex]
@@ -244,7 +285,7 @@ func drawLines():
 		verticalLine.default_color = Color.WHITE
 		horizontalLine.width = lineThickness
 		verticalLine.width = lineThickness
-	
+		
 		var hStart := offset + Vector2(-nudge, i * tileSize)
 		var hEnd := hStart + Vector2(gridSize - (lineThickness * (width % 2 - 1)), 0)
 		var vStart := offset + Vector2(i * (tileSize), -nudge)
@@ -255,7 +296,7 @@ func drawLines():
 
 var swapQueue = []
 var tileTween: Tween
-func swap(direction, animLength: float = 0.2):
+func swap(direction, animLength: float = 0.1):
 	swapQueue.append({"direction": direction, "length": animLength})
 	if !tileTween || (tileTween && !tileTween.is_running()):
 		swapQueue.pop_front()
@@ -285,6 +326,7 @@ func swapInternal(direction, animLength):
 		tileTween = get_tree().create_tween()
 		tileTween.tween_property(moveTile, "position", gridOffset + Vector2(col, row) * tileSize, animLength)
 		tileTween.connect("finished", onSwapFinished)
+	onSwapFinished()
 
 func onSwapFinished():
 	if swapQueue.size() > 0:

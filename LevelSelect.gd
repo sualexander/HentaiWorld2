@@ -13,11 +13,9 @@ const LOCK_TEXTURE := preload("res://Textures/icon.svg")
 var save: Dictionary
 var levelKeys = []
 func _ready():
-	levelKeys = SaveSystem.levelData.keys()
 	save = SaveSystem.saveData["Slots"][SaveSystem.currentSlot]
-	var saveKeys := save.keys()
-	#assert(levelKeys == saveKeys)
-	
+	levelKeys = SaveSystem.levelData.keys()
+	assert(levelKeys == save.keys())
 	initializeUI()
 
 var background: ColorRect
@@ -47,7 +45,7 @@ func initializeUI():
 	nameLabel.position = nameIcon.position + Vector2(NAME_SIZE + 15, 0)
 	nameLabel.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	nameLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	nameLabel.text = "Nanami"
+	nameLabel.text = "Nothing selected"
 	background.add_child(nameIcon)
 	background.add_child(nameLabel)
 	
@@ -61,18 +59,28 @@ func initializeUI():
 	
 	makeLevels()
 	loadSaveData()
-	
-	add_child(background)
 	showPage()
+	
+	background.modulate = Color.BLACK
+	add_child(background)
+	var tween = get_tree().create_tween()
+	tween.tween_property(background, "modulate", Color.WHITE, Globals.SCENE_FADE_TIME)
+	await tween.finished
 
 func loadSaveData():
 	assert(levelButtons.size() == levelKeys.size())
+	unlockLevel(0)
 	for i in levelButtons.size():
-		var numSolved: int #= save[levelKeys[i]]
+		var numSolved: int = save[levelKeys[i]]
 		if numSolved == 0: continue
-		levelButtons[i].get_node("LockIcon").queue_free()
 		var icons = levelButtons[i].get_children()
-		print(icons)
+		var counter: int = 0
+		for n in range(icons.size() - 1, -1, -1):
+			if icons[n].name == "LockIcon": icons[n].queue_free()
+			else:
+				counter += 1
+				icons[n].modulate = Color.DEEP_PINK
+				if counter == numSolved: break
 
 var levelButtons = []
 func makeLevels():
@@ -111,6 +119,14 @@ func makeLevels():
 			button.add_child(icon)
 		
 		background.add_child(button)
+
+func unlockLevel(index: int):
+	levelButtons[index].disabled = false
+	levelButtons[index].modulate = Color.WHITE
+	var icons = levelButtons[index].get_children()
+	for icon in icons:
+		if icon.name == "LockIcon": icon.queue_free()
+		icon.visible = true
 
 func getNumPuzzles(key: String) -> int:
 	var puzzles = SaveSystem.levelData[key]
@@ -154,10 +170,18 @@ func onNextClicked(button: TextureButton):
 	clickAnimation(button)
 	showPage()
 
+var pageIndex: int = 0
+func showPage():
+	for button in levelButtons: button.visible = false
+	var start: int = pageIndex * 6
+	var end: int = min(start + 6, levelButtons.size())
+	for i in range(start, end):
+		levelButtons[i].visible = true
+
 func onLevelClicked(button: TextureButton):
 	var puzzleScene = load("res://Puzzle.tscn").instantiate()
 	var tween = get_tree().create_tween()
-	tween.tween_property(background, "modulate", Color.BLACK, 1)
+	tween.tween_property(background, "modulate", Color.BLACK, Globals.SCENE_FADE_TIME)
 	clickAnimation(button)
 	await tween.finished
 	var oldScene = get_tree().root.get_node("LevelSelect")
@@ -169,7 +193,7 @@ func _input(event):
 	if Input.is_action_just_pressed("escape"):
 		var newScene = load("res://MainMenu.tscn").instantiate()
 		var tween = get_tree().create_tween()
-		tween.tween_property(background, "modulate", Color.BLACK, 1)
+		tween.tween_property(background, "modulate", Color.BLACK, Globals.SCENE_FADE_TIME)
 		await tween.finished
 		var oldScene = get_tree().root.get_node("LevelSelect")
 		oldScene.call_deferred("free")
@@ -182,11 +206,3 @@ func clickAnimation(button: TextureButton):
 	tween.tween_property(button, "modulate", Color.BLACK, 0.1)
 	tween.chain().tween_property(button, "modulate", color, 0.1)
 	await tween.finished
-
-var pageIndex: int = 0
-func showPage():
-	for button in levelButtons: button.visible = false
-	var start: int = pageIndex * 6
-	var end: int = min(start + 6, levelButtons.size())
-	for i in range(start, end):
-		levelButtons[i].visible = true

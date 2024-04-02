@@ -18,6 +18,7 @@ config/icon="res://Textures/icon.svg"
 [autoload]
 
 SaveSystem="*res://SaveSystem.gd"
+Globals="*res://Globals.gd"
 
 [display]
 

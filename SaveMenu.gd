@@ -32,7 +32,7 @@ func start():
 	confirmation = background.get_node("Panel")
 	
 	tween = get_tree().create_tween()
-	tween.tween_property(background, "modulate", Color.WHITE, 1)
+	tween.tween_property(background, "modulate", Color.WHITE, Globals.SCENE_FADE_TIME)
 	await tween.finished
 
 var clickTimer: Timer
@@ -74,7 +74,7 @@ func onConfirm(cancel: bool):
 func levelSelect():
 	var newScene = load("res://LevelSelect.tscn").instantiate()
 	tween = get_tree().create_tween()
-	tween.tween_property(background, "modulate", Color.BLACK, 1)
+	tween.tween_property(background, "modulate", Color.BLACK, Globals.SCENE_FADE_TIME)
 	await tween.finished
 	var oldScene = get_tree().root.get_node("SaveMenu")
 	oldScene.call_deferred("free")
@@ -94,7 +94,7 @@ func _input(event):
 		elif Input.is_action_just_pressed("escape"):
 			var newScene = load("res://MainMenu.tscn").instantiate()
 			tween = get_tree().create_tween()
-			tween.tween_property(background, "modulate", Color.BLACK, 1)
+			tween.tween_property(background, "modulate", Color.BLACK, Globals.SCENE_FADE_TIME)
 			await tween.finished
 			var oldScene = get_tree().root.get_node("SaveMenu")
 			oldScene.call_deferred("free")

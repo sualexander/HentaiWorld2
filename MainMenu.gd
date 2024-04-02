@@ -6,13 +6,13 @@ func _ready():
 	background = get_node("Background")
 	background.modulate = Color.BLACK
 	var tween = get_tree().create_tween()
-	tween.tween_property(background, "modulate", Color.WHITE, 1)
+	tween.tween_property(background, "modulate", Color.WHITE, Globals.SCENE_FADE_TIME)
 	
 	if !get_tree().root.get_node("PersistentAudio"):
 		var audio = AudioStreamPlayer.new()
 		audio.name = "PersistentAudio"
 		audio.stream = load("res://Sound/PavaneForADeadPrincess.mp3")
-		audio.autoplay = true
+		#audio.autoplay = true
 		get_tree().root.add_child.call_deferred(audio)
 
 func onNewPressed():
@@ -24,7 +24,7 @@ func onLoadPressed():
 func start(isLoad: bool):
 	var newScene = load("res://SaveMenu.tscn").instantiate()
 	var tween = get_tree().create_tween()
-	tween.tween_property(background, "modulate", Color.BLACK, 1)
+	tween.tween_property(background, "modulate", Color.BLACK, Globals.SCENE_FADE_TIME)
 	await tween.finished
 	var oldScene = get_tree().root.get_node("MainMenu")
 	oldScene.call_deferred("free")
@@ -34,6 +34,6 @@ func start(isLoad: bool):
 
 func onQuitPressed():
 	var tween = get_tree().create_tween()
-	tween.tween_property(background, "modulate", Color.BLACK, 1)
+	tween.tween_property(background, "modulate", Color.BLACK, Globals.SCENE_FADE_TIME)
 	await tween.finished
 	get_tree().quit()

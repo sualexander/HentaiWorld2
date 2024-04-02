@@ -1,7 +1,7 @@
 {
 	"Level1": [
 		{
-			"texture": "res://Textures/TestPuzzle.png",
+			"texture": "res://Textures/blonde.png",
 			"dialogue": ["Initial dialogue 1", "Initial dialogue 2"],
 			"dialoguePosition": [200, 200]
 		},

@@ -9,16 +9,23 @@ var levelsPath := "res://levels.json"
 var levelData: Dictionary
 
 func _ready():
-	saveData = JSON.parse_string(FileAccess.get_file_as_string(savePath))
-	levelData = JSON.parse_string(FileAccess.get_file_as_string(levelsPath))
-	saveData = {}
+	if OS.has_feature("template"): savePath = "user://saves.json"
+	if FileAccess.file_exists(savePath):
+		saveData = JSON.parse_string(FileAccess.get_file_as_string(savePath))
+		levelData = JSON.parse_string(FileAccess.get_file_as_string(levelsPath))
+	else:
+		var saveFile = FileAccess.open(savePath, FileAccess.WRITE)
+		saveData["Slots"] = [null, null, null]
+		saveData["Names"] = ["", "", ""]
+		saveFile.store_string(JSON.stringify(saveData))
+		saveFile.close()
+	
 	if saveData == {}: 
 		saveData["Slots"] = [null, null, null]
 		saveData["Names"] = ["", "", ""]
 	
 	newSave(2)
 	updateSave("", "Level2", 4)
-	print(saveData["Names"][currentSlot])
 
 func newSave(slot: int):
 	var save: Dictionary
@@ -32,6 +39,7 @@ func newSave(slot: int):
 func saveGame():
 	var saveFile = FileAccess.open(savePath, FileAccess.WRITE)
 	saveFile.store_string(JSON.stringify(saveData))
+	saveFile.close()
 
 func updateSave(saveName: String = "", levelName: String = "", puzzleIndex: int = -1):
 	var name: String = saveData["Names"][currentSlot]
