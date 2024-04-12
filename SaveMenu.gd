@@ -11,8 +11,8 @@ var isLoad: bool
 func start():
 	background = get_node("Background")
 	background.modulate = Color.BLACK
-	background.material.set_shader_parameter("color1", Color.PINK)
-	background.material.set_shader_parameter("color2", Color.FLORAL_WHITE)
+	background.material.set_shader_parameter("color1", Color(.35, 0, .18, 1))
+	background.material.set_shader_parameter("color2", Color(.3, 0, .15, 1))
 	background.material.set_shader_parameter("speed", Vector2(-0.5, -0.2))
 	background.material.set_shader_parameter("rotationSpeed", 0.2)
 	background.material.set_shader_parameter("center", Vector2(get_tree().root.content_scale_size / 2))
@@ -27,7 +27,7 @@ func start():
 			buttons[i].disabled = true
 		else:
 			buttons[i].light_mask = i
-			buttons[i].connect("pressed", onClicked.bind(buttons[i]))
+			buttons[i].pressed.connect(onClicked.bind(buttons[i]))
 	
 	confirmation = background.get_node("Panel")
 	
@@ -44,7 +44,7 @@ func onClicked(button):
 			clickTimer = Timer.new()
 			add_child(clickTimer)
 			clickTimer.start(DOUBLE_CLICK_LENGTH)
-			clickTimer.connect("timeout", singleClick.bind(button))
+			clickTimer.timeout.connect(singleClick.bind(button))
 
 func singleClick(button):
 	if clickTimer: clickTimer.queue_free()
@@ -86,8 +86,8 @@ func _input(event):
 	if state == State.Default:
 		if isLoad && (event is InputEventMouseButton && event.double_click):
 			for b in buttons:
-				if b.get_global_rect().has_point(event.position):
-					if clickTimer: clickTimer.queue_free()
+				if !b.disabled && b.get_global_rect().has_point(event.position):
+					if clickTimer: clickTimer.free()
 					clickedButton = b
 					startEditing()
 					return
@@ -114,7 +114,8 @@ func _input(event):
 			event.unicode != ":".unicode_at(0):
 				clickedButton.text += char(event.unicode)
 	else:
-		pass
+		if Input.is_action_just_pressed("escape"):
+			onConfirm(true)
 
 func startEditing():
 	state = State.Editing

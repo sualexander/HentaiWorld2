@@ -7,13 +7,6 @@ func _ready():
 	background.modulate = Color.BLACK
 	var tween = get_tree().create_tween()
 	tween.tween_property(background, "modulate", Color.WHITE, Globals.SCENE_FADE_TIME)
-	
-	if !get_tree().root.get_node("PersistentAudio"):
-		var audio = AudioStreamPlayer.new()
-		audio.name = "PersistentAudio"
-		audio.stream = load("res://Sound/PavaneForADeadPrincess.mp3")
-		#audio.autoplay = true
-		get_tree().root.add_child.call_deferred(audio)
 
 func onNewPressed():
 	start(false)

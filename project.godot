@@ -13,18 +13,28 @@ config_version=5
 config/name="Hentai World 2"
 run/main_scene="res://MainMenu.tscn"
 config/features=PackedStringArray("4.2", "Mobile")
-config/icon="res://Textures/icon.svg"
 
 [autoload]
 
 SaveSystem="*res://SaveSystem.gd"
 Globals="*res://Globals.gd"
+Solver="*res://Solver.gd"
+
+[debug]
+
+gdscript/warnings/unassigned_variable=0
+gdscript/warnings/unused_variable=0
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 window/stretch/mode="viewport"
+window/vsync/vsync_mode=0
+
+[editor_plugins]
+
+enabled=PackedStringArray()
 
 [input]
 
@@ -72,3 +82,4 @@ escape={
 [rendering]
 
 renderer/rendering_method="mobile"
+anti_aliasing/quality/msaa_2d=2

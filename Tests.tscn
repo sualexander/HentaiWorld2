@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://cjct3hnxpx5au"]
+
+[ext_resource type="Material" uid="uid://da1qb7mtbsmil" path="res://Dressing/Blur.tres" id="1_bxdnf"]
+[ext_resource type="Texture2D" uid="uid://g7lnd86ck2y8" path="res://Textures/Skater1.png" id="2_6g4x4"]
+
+[node name="Tests" type="Node2D"]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+material = ExtResource("1_bxdnf")
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_6g4x4")
+
+[node name="Control" type="Control" parent="TextureRect"]
+anchors_preset = 0
+offset_left = 854.0
+offset_top = 316.0
+offset_right = 894.0
+offset_bottom = 356.0

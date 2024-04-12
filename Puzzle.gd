@@ -1,14 +1,14 @@
 extends Node2D
 
 
-const gridSize: int = 512
+const gridSize: int = 800
 const lineThickness: int = 4
 const shuffleSpeed: float = 0.1
 const fontColor = Color.DEEP_PINK
-const fontSize: int = 16
+const fontSize: int = 24
 const textMargin: float = fontSize * 1.5
-const borderThickness: float = 4
-const dialogueFadeTime: float = 0.5
+const borderThickness: float = 6
+const dialogueFadeTime: float = 0.25
 
 #from json
 var data = []
@@ -19,6 +19,7 @@ var widths: PackedInt32Array
 
 #persistent objects
 var background: TextureRect
+var border: ColorRect
 var bubble: Polygon2D
 var bubbleOutline: Polygon2D
 var dialogue: Label
@@ -28,17 +29,17 @@ enum State {Dialogue, Shuffling, Playing}
 var state: State = State.Shuffling
 var puzzleIndex: int = 0
 var levelName: String
+var saveIndex: int
 
 func startLevel(name: String):
 	levelName = name
 	data = SaveSystem.levelData[levelName]
 	for puzzle in data:
-		if puzzle.has("size"): 
-			widths.append(puzzle["size"])
+		if puzzle.has("size"): widths.append(puzzle["size"])
 		else: widths.append(0)
-		dialogues.append(puzzle["dialogue"])
 		if puzzle.has("texture"): textures.append(load(puzzle["texture"]))
 		else: textures.append(null)
+		dialogues.append(puzzle["dialogue"])
 		if puzzle.has("dialoguePosition"):
 			var positionArray = puzzle["dialoguePosition"]
 			dialoguePositions.append(Vector2(positionArray[0], positionArray[1]))
@@ -46,24 +47,35 @@ func startLevel(name: String):
 	assert(widths.size() == textures.size() && widths.size() == dialogues.size() && widths.size() == dialoguePositions.size())
 	
 	var counter: int = 0
+	var numPuzzles: int = 0
 	var lastPuzzleIndex: int
 	var numSolved: int = SaveSystem.saveData["Slots"][SaveSystem.currentSlot][levelName]
+	saveIndex = numSolved
 	if numSolved != 0:
 		for i in range(widths.size()):
 			if widths[i] != 0:
+				numPuzzles += 1
 				lastPuzzleIndex = i
-				if counter != numSolved: 
+				if counter <= numSolved: 
 					counter += 1
-			puzzleIndex = counter + 1
-		if puzzleIndex > lastPuzzleIndex: puzzleIndex = lastPuzzleIndex
+					puzzleIndex = i
+		if puzzleIndex > lastPuzzleIndex: 
+			puzzleIndex = lastPuzzleIndex
+		if saveIndex == numPuzzles: saveIndex -= 1
 	
 	background = TextureRect.new()
 	add_child(background)
-	background.texture = textures[0]
+	
+	var index: int = puzzleIndex
+	if !textures[puzzleIndex]:
+		for i in range(puzzleIndex - 1, -1, -1):
+			if textures[i]:
+				index = i
+				break
+	background.texture = textures[index]
 	background.modulate = Color.BLACK
 	var tween = get_tree().create_tween()
 	tween.tween_property(background, "modulate", Color.WHITE, Globals.SCENE_FADE_TIME)
-	
 	await tween.finished
 	connect("swapQueueFinished", onSwapQueueFinished)
 	initializeDialogue()
@@ -78,7 +90,6 @@ func initializeDialogue():
 	bubbleOutline.color = Color.HOT_PINK
 	bubbleOutline.antialiased = true
 	bubble = Polygon2D.new()
-	bubble.color = Color.WHITE
 	bubble.antialiased = true
 	
 	bubbleOutline.modulate = Color(1, 1, 1, 0)
@@ -91,6 +102,7 @@ func initializeDialogue():
 var dialogueIndex: int = 0
 var currentDialogue: PackedStringArray
 var dialoguePosition: Vector2
+var backgroundTexture
 func advanceDialogue():
 	if textTween && textTween.is_running(): return
 	
@@ -104,6 +116,14 @@ func advanceDialogue():
 					dialoguePosition = dialoguePositions[i]
 					break
 		assert(dialoguePosition != Vector2.ZERO)
+	if textures[puzzleIndex]: backgroundTexture = textures[puzzleIndex]
+	if !backgroundTexture:
+		for i in range(puzzleIndex - 1, -1, -1):
+			if textures[i]:
+				backgroundTexture = textures[i]
+				break
+	background.texture = backgroundTexture
+	
 	if dialogueIndex == currentDialogue.size(): 
 		dialogueIndex = 0
 		textTween = get_tree().create_tween()
@@ -111,7 +131,9 @@ func advanceDialogue():
 		await textTween.finished
 		if widths[puzzleIndex] != 0: createPuzzle()
 		else:
-			if puzzleIndex + 1 == data.size(): endLevel()
+			if puzzleIndex + 1 == data.size(): 
+				await destroyPuzzle()
+				exitLevel()
 			else:
 				puzzleIndex += 1
 				advanceDialogue()
@@ -122,64 +144,52 @@ func advanceDialogue():
 func onSwapQueueFinished():
 	if state == State.Shuffling:
 		if isPuzzleSolved(): shuffle(5)
-		else: state = State.Playing
+		else:
+			state = State.Playing
+			toggleBlur(false)
 	elif state == State.Playing:
-		if isPuzzleSolved(): 
-			print(puzzleIndex)
-			if puzzleIndex + 1 == data.size(): endLevel()
+		if isPuzzleSolved():
+			state = State.Shuffling
+			if isCheating:
+				isCheating = false
+				for tile in tiles: if tile: tile.modulate = Color(0.9, 0.9, 1, 1)
+			SaveSystem.updateSave("", levelName, saveIndex)
+			await destroyPuzzle()
+			if puzzleIndex + 1 == data.size(): 
+				#ending animation
+				exitLevel()
 			else:
-				SaveSystem.updateSave("", levelName, puzzleIndex)
-				destroyPuzzle()
 				puzzleIndex += 1
 				advanceDialogue()
 
-func endLevel():
-	state = State.Shuffling
-	destroyPuzzle()
-	#ending animation
-	exitLevel()
-
-var backgroundTexture
 var gridOffset: Vector2
-var tileSize: float
 func createPuzzle():
+	saveIndex += 1
 	state = State.Shuffling
-	if textures[puzzleIndex]: backgroundTexture = textures[puzzleIndex]
-	if !backgroundTexture:
-		for i in range(puzzleIndex - 1, -1, -1):
-			if textures[i]:
-				backgroundTexture = textures[i]
-				break
-		background.texture = backgroundTexture
-	assert(dialoguePosition != Vector2.ZERO)
 	
-	tileSize = float(gridSize) / widths[puzzleIndex]
 	var resolution = get_tree().root.content_scale_size
-	gridOffset = Vector2((resolution.x - gridSize + tileSize) / 2, (resolution.y - gridSize + tileSize) / 2)
+	gridOffset = Vector2((resolution.x - gridSize) / 2, (resolution.y - gridSize) / 2)
 	
-	var border := ColorRect.new()
-	add_child(border)
+	border = ColorRect.new()
+	background.add_child(border)
+	border.position = gridOffset - (Vector2.ONE * lineThickness)
+	border.size = Vector2.ONE * (gridSize + 2 * lineThickness)
 	border.color = Color.WHITE
-	border.position = gridOffset - Vector2(tileSize / 2, tileSize / 2)
-	border.size = Vector2(gridSize, gridSize)
-	
-	var overlay := ColorRect.new()
-	add_child(overlay)
-	overlay.z_index = 10
-	overlay.color = Color(0.2, 0.2, 0.4, 0.25)
-	overlay.position = gridOffset - Vector2(tileSize / 2, tileSize / 2)
-	overlay.size = Vector2(gridSize, gridSize)
 	
 	createGrid()
-	shuffle(1)
+	toggleBlur(true)
+	var shuffle = data[puzzleIndex]["shuffle"]
+	if shuffle is float: shuffle(shuffle)
+	else: for dir in shuffle: swap(dir)
 
 func destroyPuzzle():
+	var tween = get_tree().create_tween()
+	tween.tween_property(border, "modulate", Color(1, 1, 1, 0), 0.5)
+	await tween.finished
+	for tile in tiles: if tile: tile.queue_free()
 	tiles.clear()
-	for child in get_children(): 
-		if child is ColorRect || child is Line2D || child is Sprite2D:
-			child.queue_free()
 
-func _input(_event):
+func _input(event):
 	if Input.is_action_just_pressed("escape"):
 		exitLevel()
 	else:
@@ -187,11 +197,22 @@ func _input(_event):
 			if Input.is_action_just_pressed("enter") || Input.is_action_just_pressed("right") ||\
 			Input.is_action_just_pressed("up"): 
 				advanceDialogue()
-		elif state == State.Playing:
+		elif state == State.Playing && !isCheating:
 			if Input.is_action_just_pressed("left"): swap("right")
-			if Input.is_action_just_pressed("right"): swap("left")
-			if Input.is_action_just_pressed("up"): swap("down")
-			if Input.is_action_just_pressed("down"): swap("up")
+			elif Input.is_action_just_pressed("right"): swap("left")
+			elif Input.is_action_just_pressed("up"): swap("down")
+			elif Input.is_action_just_pressed("down"): swap("up")
+			
+			elif event is InputEventKey && event.pressed && event.keycode == KEY_C:
+				solvePuzzle()
+			elif event is InputEventKey && event.pressed && event.keycode == KEY_F:
+				shuffle(20)
+	if event is InputEventKey && event.pressed && event.keycode == KEY_G:
+		await destroyPuzzle()
+		if puzzleIndex + 1 == data.size(): exitLevel()
+		else:
+			puzzleIndex += 1
+			advanceDialogue()
 
 func exitLevel():
 	var newScene = load("res://LevelSelect.tscn").instantiate()
@@ -211,6 +232,14 @@ func renderDialogue(text: String, pos: Vector2):
 		await textTween.finished
 	
 	dialogue.text = text
+	if data[puzzleIndex].has("flip"):
+		bubbleOutline.scale = Vector2(-1, 1)
+		dialogue.scale = Vector2(-1, 1)
+		dialogue.position += Vector2(data[puzzleIndex]["flip"], 0)
+	else:
+		bubbleOutline.scale = Vector2.ONE
+		dialogue.scale = Vector2.ONE
+		dialogue.position = Vector2(float(textMargin) / 2, float(textMargin) / 2)
 	#await get_tree().process_frame #idk if this is needed, doesn't seem like
 	var dim := Vector2(dialogue.get_minimum_size().x + textMargin, dialogue.get_minimum_size().y + textMargin)
 	var tailHeight: float = clamp(dim.y / 3, 15, 35)
@@ -238,7 +267,7 @@ func renderDialogue(text: String, pos: Vector2):
 	offsetPoints.append_array(makeArc(Vector2(dim.x - radius + borderThickness, dim.y - radius + borderThickness), 0, PI/2, radius))
 	offsetPoints.append_array(makeArc(Vector2(radius - borderThickness, dim.y - radius + borderThickness), PI/2, PI, radius))
 	bubbleOutline.polygon = offsetPoints
-	bubbleOutline.position = pos
+	bubbleOutline.position = Vector2(pos.x - (dim.x + tailWidth + borderThickness + textMargin), pos.y - (tailY + borderThickness))
 	
 	textTween = get_tree().create_tween()
 	textTween.tween_property(bubbleOutline, "modulate", Color(1, 1, 1, 1), dialogueFadeTime)
@@ -250,49 +279,35 @@ func makeArc(origin: Vector2, start: float, end: float, radius: float, numSegmen
 		points.append(origin + Vector2(cos(theta), sin(theta)) * radius)
 	return points
 
+var tileSize: float
 var tiles = []
+var blank: int
 func createGrid():
 	var width := widths[puzzleIndex]
+	tileSize = (gridSize - ((widths[puzzleIndex] - 1) * lineThickness)) / widths[puzzleIndex]
 	for row in range(width):
 		for col in range(width):
-			if row == 0 and col == 0:
+			if row == width - 1 and col == width - 1:
 				tiles.append(null)
 				continue
-				
+			
 			var tile := Sprite2D.new()
 			tiles.append(tile)
-			add_child(tile)
+			border.add_child(tile)
 			
 			tile.light_mask = row * width + col #unused property to store original index 
 			tile.texture = background.texture
-			tile.position = gridOffset + Vector2(col * tileSize, row * tileSize)
+			tile.position = (Vector2.ONE * ((tileSize / 2) + lineThickness)) + Vector2(col, row) * (tileSize + lineThickness)
 			tile.region_enabled = true
-			tile.region_rect = Rect2(tile.position.x - (tileSize / 2), tile.position.y - (tileSize / 2), 
+			tile.region_rect = Rect2(tile.position.x - (tileSize / 2) + border.position.x, tile.position.y - (tileSize / 2) + border.position.y, 
 			tileSize, tileSize)
+			tile.modulate = Color(0.9, 0.9, 1, 1)
+			tile.material = load("res://Dressing/Blur.tres")
+	blank = width * width - 1
 
-func drawLines():
-	var width := widths[puzzleIndex]
-	var offset := gridOffset - Vector2(tileSize / 2, tileSize / 2)
-	var nudge := float(lineThickness) / 2
-	
-	for i in range(width + 1):
-		var horizontalLine := Line2D.new()
-		var verticalLine := Line2D.new()
-		add_child(horizontalLine)
-		add_child(verticalLine)
-		
-		horizontalLine.default_color = Color.WHITE
-		verticalLine.default_color = Color.WHITE
-		horizontalLine.width = lineThickness
-		verticalLine.width = lineThickness
-		
-		var hStart := offset + Vector2(-nudge, i * tileSize)
-		var hEnd := hStart + Vector2(gridSize - (lineThickness * (width % 2 - 1)), 0)
-		var vStart := offset + Vector2(i * (tileSize), -nudge)
-		var vEnd := vStart + Vector2(0, gridSize - (lineThickness * (width % 2 - 1)))
-		
-		horizontalLine.points = [hStart, hEnd]
-		verticalLine.points = [vStart, vEnd]
+func toggleBlur(isOn: bool):
+	for tile: Sprite2D in tiles:
+		if tile: tile.material.set_shader_parameter("isOn", isOn)
 
 var swapQueue = []
 var tileTween: Tween
@@ -302,7 +317,6 @@ func swap(direction, animLength: float = 0.1):
 		swapQueue.pop_front()
 		swapInternal(direction, animLength)
 
-var blank: int = 0
 func swapInternal(direction, animLength):
 	var width := widths[puzzleIndex]
 	var row: int = blank / width
@@ -324,11 +338,12 @@ func swapInternal(direction, animLength):
 		tiles[blank] = null
 		
 		tileTween = get_tree().create_tween()
-		tileTween.tween_property(moveTile, "position", gridOffset + Vector2(col, row) * tileSize, animLength)
-		tileTween.connect("finished", onSwapFinished)
-	onSwapFinished()
+		tileTween.tween_property(moveTile, "position", (Vector2.ONE * ((tileSize / 2) + lineThickness)) + Vector2(col, row) * (tileSize + lineThickness), animLength)
+		tileTween.finished.connect(onSwapFinished)
+	else: onSwapFinished()
 
 func onSwapFinished():
+	if tileTween && tileTween.finished.is_connected(onSwapFinished): tileTween.finished.disconnect(onSwapFinished)
 	if swapQueue.size() > 0:
 		var newSwap = swapQueue.pop_front()
 		swapInternal(newSwap.direction, newSwap.length)
@@ -364,7 +379,18 @@ func shuffle(numMoves : int):
 			"right": localBlank += 1
 
 func isPuzzleSolved() -> bool:
-	if tiles[0] != null: return false
-	for i in range (1, tiles.size()):
+	if tiles[tiles.size() - 1] != null: return false
+	for i in range(0, tiles.size() - 1):
 		if tiles[i].light_mask != i: return false
 	return true
+
+var isCheating: bool = false
+func solvePuzzle():
+	isCheating = true
+	for tile in tiles: if tile: tile.modulate = Color.INDIAN_RED
+	var grid = []
+	for tile in tiles:
+		if tile: grid.append(tile.light_mask + 1)
+		else: grid.append(0)
+	var moves: PackedStringArray = Solver.getSolution(grid)
+	for move in moves: swap(move, 0.1)

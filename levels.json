@@ -1,41 +1,123 @@
 {
-	"Level1": [
+	"Skater-1": [
 		{
-			"texture": "res://Textures/blonde.png",
-			"dialogue": ["Initial dialogue 1", "Initial dialogue 2"],
-			"dialoguePosition": [200, 200]
+			"texture": "res://Textures/Skater1.png",
+			"dialogue": ["Well, well, well, what do we have here.\nAnother lost puppy stumbling into my playground."],
+			"dialoguePosition": [2260, 315],
+			"flip": 580
 		},
 		{
-			"size": 3,
-			"dialogue": ["Level1 puzzle 1 dialogue"],
-			"dialoguePosition": [200, 200]
+			"dialogue": ["Buckle up sweetheart. I promise to\nmake you sweat more than a hot day\non the half-pipe"],
+			"dialoguePosition": [1935, 315],
+			"flip": -150
 		},
 		{
 			"size": 4,
-			"dialogue": ["Level1 puzzle 2 dialogue"]
+			"shuffle": 25,
+			"dialogue": ["But forget about the usual grinds, today I'm looking\nfor something far more stimulating"],
+			"dialoguePosition": [2270, 315],
+			"flip": 165
+		},
+		{
+			"texture": "res://Textures/Skater2.png",
+			"size": 3,
+			"shuffle": ["right", "down", "right", "up", "left", "down", "right", "up"],
+			"dialogue": ["Let's see if you have the stamina to keep up\nwith my... demanding challenges.\nI promise it'll be worth the effort"],
+			"dialoguePosition": [1000, 300]
+		},
+		{
+			"size": 3,
+			"shuffle": ["down", "right", "right", "up", "left", "left", "down", 
+			"right", "right", "up", "left", "left"],
+			"dialogue": ["And maybe, just maybe, I'll show\nyou a side of me few have ever seen"]
+		},
+		{
+			"dialogue": ["Catch you later tonight"]
+		}
+	],
+	"Skater-2": [
+		{
+			"size": 3,
+			"shuffle": 2,
+			"texture": "res://Textures/Skater3.png",
+			"dialogue": ["Sup"],
+			"dialoguePosition": [600, 300]
+		},
+		{
+			"size": 3,
+			"shuffle": 2,
+			"texture": "res://Textures/Skater2.png",
+			"dialogue": ["Nice"],
+			"dialoguePosition": [600, 300]
+		},
+		{
+			"size": 4,
+			"shuffle": 2,
+			"texture": "res://Textures/Skater3.png",
+			"dialogue": ["Bye"],
+			"dialoguePosition": [600, 300]
+		}
+	],
+	"Blue": [
+		{
+			"texture": "res://Textures/Blue.png",
+			"dialogue": ["It's so cold in here"],
+			"dialoguePosition": [1235, 300]
+		},
+		{
+			"size": 3,
+			"shuffle": ["right", "down", "left", "up", "right", "down"],
+			"dialogue": ["Would you like some tea?"]
+		},
+		{
+			"size": 3,
+			"shuffle": ["right", "down", "right", "up", "left", "down", "right", "up"],
+			"dialogue": ["I want to drink from your lips"]
+		},
+		{
+			"size": 3,
+			"shuffle": ["down", "right", "right", "up", "left", "left", "down", 
+			"right", "right", "up", "left", "left"],
+			"dialogue": ["Gulp gulp"]
 		},
 		{
 			"dialogue": ["Ending dialogue"]
 		}
 	],
-	"Level2": [
+	"Blonde": [
 		{
-			"texture": "res://Textures/TestPuzzle.png"
-		}
-	],
-	"Level3": [
+			"size": 3,
+			"shuffle": ["right", "right", "down", "down", "left", "left", "up", "up"],
+			"texture": "res://Textures/blonde.png",
+			"dialogue": ["You're looking tasty"],
+			"dialoguePosition": [600, 300]
+		},
 		{
-			"texture": "res://Textures/TestPuzzle.png"
+			"size": 3,
+			"shuffle": ["right", "right", "down", "down", "left", "left", "up", "up", 
+			"right", "right", "down", "down", "left", "left", "up", "up", "right", "right", 
+			"down", "left"],
+			"dialogue": ["Sooooooo tasty"]
+		},
+		{
+			"size": 3,
+			"shuffle": ["down", "down", "right", "right", "up", "up", "left", "down", 
+			"down", "right", "up", "up"],
+			"dialogue": ["yummy yummy!", "I'll see you soon ;)"]
 		}
 	],
 	"Level4": [
 		{
-			"texture": "res://Textures/TestPuzzle.png"
+			"size": 5,
+			"shuffle": 20,
+			"texture": "res://Textures/blonde.png",
+			"dialogue": ["Hello again"],
+			"dialoguePosition": [600, 300]
 		}
 	],
 	"Level5": [
 		{
-			"texture": "res://Textures/TestPuzzle.png"
+			"texture": "res://Textures/blonde.png"
 		}
 	],
 	"Level6": [

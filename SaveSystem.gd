@@ -12,20 +12,26 @@ func _ready():
 	if OS.has_feature("template"): savePath = "user://saves.json"
 	if FileAccess.file_exists(savePath):
 		saveData = JSON.parse_string(FileAccess.get_file_as_string(savePath))
-		levelData = JSON.parse_string(FileAccess.get_file_as_string(levelsPath))
 	else:
 		var saveFile = FileAccess.open(savePath, FileAccess.WRITE)
 		saveData["Slots"] = [null, null, null]
 		saveData["Names"] = ["", "", ""]
 		saveFile.store_string(JSON.stringify(saveData))
 		saveFile.close()
+	levelData = JSON.parse_string(FileAccess.get_file_as_string(levelsPath))
 	
-	if saveData == {}: 
+	if !OS.has_feature("template"):
 		saveData["Slots"] = [null, null, null]
 		saveData["Names"] = ["", "", ""]
+		newSave(0)
+		saveGame()
 	
-	newSave(2)
-	updateSave("", "Level2", 4)
+	var audio = AudioStreamPlayer.new()
+	audio.name = "PersistentAudio"
+	audio.stream = load("res://Sound/MainTheme.mp3")
+	#audio.autoplay = true
+	audio.volume_db = -5
+	get_tree().root.add_child.call_deferred(audio)
 
 func newSave(slot: int):
 	var save: Dictionary

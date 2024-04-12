@@ -5,23 +5,23 @@
 [ext_resource type="Theme" uid="uid://xv7rhh2aw26" path="res://Dressing/Theme.tres" id="3_0hyw4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u55je"]
-bg_color = Color(0.737255, 0, 0.533333, 1)
-border_width_left = 8
-border_width_top = 8
-border_width_right = 8
-border_width_bottom = 8
+bg_color = Color(0.619608, 0.141176, 0.541176, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
 border_color = Color(1, 1, 1, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
 
 [node name="SaveMenu" type="Node2D"]
 script = ExtResource("1_670as")
 
 [node name="Background" type="ColorRect" parent="."]
 material = ExtResource("2_h2nyd")
-custom_minimum_size = Vector2(1280, 720)
+custom_minimum_size = Vector2(1920, 1080)
 offset_right = 1280.0
 offset_bottom = 720.0
 
@@ -32,17 +32,17 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
+offset_left = -350.0
 offset_top = -360.0
-offset_right = 200.0
+offset_right = 350.0
 offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 82
+theme_override_constants/separation = 100
 alignment = 1
 
 [node name="Button" type="Button" parent="Background/VBoxContainer"]
-custom_minimum_size = Vector2(400, 57)
+custom_minimum_size = Vector2(400, 80)
 layout_mode = 2
 focus_mode = 0
 theme = ExtResource("3_0hyw4")
@@ -51,7 +51,7 @@ text_overrun_behavior = 1
 clip_text = true
 
 [node name="Button2" type="Button" parent="Background/VBoxContainer"]
-custom_minimum_size = Vector2(400, 57)
+custom_minimum_size = Vector2(400, 80)
 layout_mode = 2
 focus_mode = 0
 theme = ExtResource("3_0hyw4")
@@ -60,7 +60,7 @@ text_overrun_behavior = 1
 clip_text = true
 
 [node name="Button3" type="Button" parent="Background/VBoxContainer"]
-custom_minimum_size = Vector2(400, 57)
+custom_minimum_size = Vector2(400, 80)
 layout_mode = 2
 focus_mode = 0
 theme = ExtResource("3_0hyw4")
@@ -72,10 +72,11 @@ clip_text = true
 visible = false
 custom_minimum_size = Vector2(400, 128)
 layout_mode = 0
-offset_left = 370.0
-offset_top = 260.0
-offset_right = 910.0
-offset_bottom = 404.0
+offset_left = 555.0
+offset_top = 430.0
+offset_right = 1095.0
+offset_bottom = 574.0
+scale = Vector2(1.5, 1.5)
 theme_override_styles/panel = SubResource("StyleBoxFlat_u55je")
 
 [node name="Label" type="Label" parent="Background/Panel"]

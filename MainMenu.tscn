@@ -1,41 +1,69 @@
-[gd_scene load_steps=3 format=3 uid="uid://cwwnuu6lf3fla"]
+[gd_scene load_steps=7 format=3 uid="uid://cwwnuu6lf3fla"]
 
 [ext_resource type="Script" path="res://MainMenu.gd" id="1_bfkau"]
 [ext_resource type="Texture2D" uid="uid://b5ci0iwjl8vpe" path="res://Textures/MainMenu.png" id="2_6ou8k"]
+[ext_resource type="FontFile" uid="uid://bjq45q8pltjgp" path="res://Dressing/TangiersBlack.otf" id="3_u7gfj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_niuiq"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_j503o"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qbmrl"]
 
 [node name="MainMenu" type="Node2D"]
 script = ExtResource("1_bfkau")
 
 [node name="Background" type="TextureRect" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 1920.0
+offset_bottom = 1080.0
 texture = ExtResource("2_6ou8k")
+expand_mode = 1
 
 [node name="New" type="Button" parent="Background"]
 layout_mode = 0
-offset_left = 206.0
-offset_top = 335.0
-offset_right = 434.0
-offset_bottom = 437.0
+offset_left = 230.0
+offset_top = 450.0
+offset_right = 627.0
+offset_bottom = 570.0
+theme_override_colors/font_color = Color(1, 0.529412, 0.772549, 1)
+theme_override_colors/font_pressed_color = Color(0.341176, 0, 0.219608, 1)
+theme_override_colors/font_hover_color = Color(0.780392, 0.12549, 0.462745, 1)
+theme_override_fonts/font = ExtResource("3_u7gfj")
+theme_override_font_sizes/font_size = 92
+theme_override_styles/focus = SubResource("StyleBoxEmpty_niuiq")
 text = "New Game"
+flat = true
 
 [node name="Load" type="Button" parent="Background"]
 layout_mode = 0
-offset_left = 206.0
-offset_top = 449.0
-offset_right = 434.0
-offset_bottom = 551.0
-text = "Load Game
-"
+offset_left = 119.0
+offset_top = 597.0
+offset_right = 516.0
+offset_bottom = 717.0
+theme_override_colors/font_color = Color(1, 0.529412, 0.772549, 1)
+theme_override_colors/font_pressed_color = Color(0.341176, 0, 0.219608, 1)
+theme_override_colors/font_hover_color = Color(0.780392, 0.12549, 0.462745, 1)
+theme_override_fonts/font = ExtResource("3_u7gfj")
+theme_override_font_sizes/font_size = 92
+theme_override_styles/focus = SubResource("StyleBoxEmpty_j503o")
+text = "Load"
+flat = true
 
 [node name="Quit" type="Button" parent="Background"]
 layout_mode = 0
-offset_left = 206.0
-offset_top = 564.0
-offset_right = 434.0
-offset_bottom = 666.0
+offset_left = 92.0
+offset_top = 744.0
+offset_right = 489.0
+offset_bottom = 864.0
+theme_override_colors/font_color = Color(1, 0.529412, 0.772549, 1)
+theme_override_colors/font_pressed_color = Color(0.341176, 0, 0.219608, 1)
+theme_override_colors/font_hover_color = Color(0.780392, 0.12549, 0.462745, 1)
+theme_override_fonts/font = ExtResource("3_u7gfj")
+theme_override_font_sizes/font_size = 92
+theme_override_styles/focus = SubResource("StyleBoxEmpty_qbmrl")
 text = "Quit
 "
+flat = true
 
 [connection signal="pressed" from="Background/New" to="." method="onNewPressed"]
 [connection signal="pressed" from="Background/Load" to="." method="onLoadPressed"]
